@@ -1,26 +1,96 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+	/* Rose Pine */
+	--color-rosepine-base: #191724;
+	--color-rosepine-surface: #1f1d2e;
+	--color-rosepine-overlay: #26233a;
+	--color-rosepine-muted: #6e6a86;
+	--color-rosepine-subtle: #908caa;
+	--color-rosepine-text: #e0def4;
+	--color-rosepine-love: #eb6f92;
+	--color-rosepine-gold: #f6c177;
+	--color-rosepine-rose: #ebbcba;
+	--color-rosepine-pine: #31748f;
+	--color-rosepine-foam: #9ccfd8;
+	--color-rosepine-iris: #c4a7e7;
+	--color-rosepine-highlight-low: #21202e;
+	--color-rosepine-highlight-med: #403d52;
+	--color-rosepine-highlight-high: #524f67;
+
+	/* Rose Pine Moon */
+	--color-rosepine-moon-base: #232136;
+	--color-rosepine-moon-surface: #2a273f;
+	--color-rosepine-moon-overlay: #393552;
+	--color-rosepine-moon-muted: #6e6a86;
+	--color-rosepine-moon-subtle: #908caa;
+	--color-rosepine-moon-text: #e0def4;
+	--color-rosepine-moon-love: #eb6f92;
+	--color-rosepine-moon-gold: #f6c177;
+	--color-rosepine-moon-rose: #ea9a97;
+	--color-rosepine-moon-pine: #3e8fb0;
+	--color-rosepine-moon-foam: #9ccfd8;
+	--color-rosepine-moon-iris: #c4a7e7;
+	--color-rosepine-moon-highlight-low: #2a283e;
+	--color-rosepine-moon-highlight-med: #44415a;
+	--color-rosepine-moon-highlight-high: #56526e;
+
+	/* Rose Pine Dawn */
+	--color-rosepine-dawn-base: #faf4ed;
+	--color-rosepine-dawn-surface: #fffaf3;
+	--color-rosepine-dawn-overlay: #f2e9e1;
+	--color-rosepine-dawn-muted: #9893a5;
+	--color-rosepine-dawn-subtle: #797593;
+	--color-rosepine-dawn-text: #575279;
+	--color-rosepine-dawn-love: #b4637a;
+	--color-rosepine-dawn-gold: #ea9d34;
+	--color-rosepine-dawn-rose: #d7827e;
+	--color-rosepine-dawn-pine: #286983;
+	--color-rosepine-dawn-foam: #56949f;
+	--color-rosepine-dawn-iris: #907aa9;
+	--color-rosepine-dawn-highlight-low: #f4ede8;
+	--color-rosepine-dawn-highlight-med: #dfdad9;
+	--color-rosepine-dawn-highlight-high: #cecacd;
+
+	/* Base Colors */
+	--color-dokusho-base: #0e1726;
+	--color-dokusho-surface: #1e2c43; /* Slightly lighter surface */
+	--color-dokusho-overlay: #141d2c; /* Overlay for cards or modals */
+	--color-dokusho-muted: #6c6c6c; /* Muted gray for secondary text */
+	--color-dokusho-subtle: #8bbadd; /* Subtle blue for highlights */
+	--color-dokusho-text: #ffffff; /* Primary text color */
+
+	/* Accent Colors */
+	--color-dokusho-primary: #3c8bc6; /* Primary blue */
+	--color-dokusho-primary-light: #8bbadd; /* Lighter blue for hover states */
+	--color-dokusho-secondary: #6610f2; /* Indigo for secondary actions */
+	--color-dokusho-success: #28a745; /* Green for success */
+	--color-dokusho-warning: #ffc107; /* Yellow for warnings */
+	--color-dokusho-danger: #dc3545; /* Red for errors */
+	--color-dokusho-info: #17a2b8; /* Cyan for informational elements */
+
+	/* Highlight Colors */
+	--color-dokusho-highlight-low: #1e2c43; /* Low contrast highlight */
+	--color-dokusho-highlight-med: #235479; /* Medium contrast highlight */
+	--color-dokusho-highlight-high: #3c8bc6; /* High contrast highlight */
+
+	/* Button Colors */
+	--color-dokusho-button-primary: #3c8bc6; /* Primary button */
+	--color-dokusho-button-secondary: #1e2c43; /* Secondary button */
+	--color-dokusho-button-hover: #235479; /* Hover state for buttons */
+
+	/* Additional Colors */
+	--color-dokusho-pink: #e83e8c; /* Pink for special accents */
+	--color-dokusho-orange: #fc4824; /* Orange for alerts or highlights */
+	--color-dokusho-teal: #20c997; /* Teal for calming accents */
+	--color-dokusho-gray: #6c6c6c; /* Neutral gray */
+	--color-dokusho-dark: #343434; /* Dark gray for contrast */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+	body {
+		@apply bg-dokusho-base;
+		@apply text-dokusho-text;
+		font-family: Arial, Helvetica, sans-serif;
+	}
 }
