@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
           medium
           color
         }
+		bannerImage
         mediaListEntry {
           id
           status

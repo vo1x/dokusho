@@ -23,7 +23,10 @@ export function useAnilistData(anilistId: string) {
 export function useUpdateAnilistProgress() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: async ({ anilistId, progress }) => {
+		mutationFn: async ({
+			anilistId,
+			progress,
+		}: { anilistId: string; progress: number }) => {
 			const response = await fetch("/api/anilist/update-list", {
 				method: "POST",
 				headers: {
@@ -47,3 +50,5 @@ export function useUpdateAnilistProgress() {
 		},
 	});
 }
+
+// change the mutation to update any provided variables for an entry and not progress only

@@ -13,9 +13,12 @@ export default async function Manga({
 	const mangaMeta = await response.json();
 
 	return (
-		<div className="flex flex-col gap-8 p-4">
+		<div className="flex flex-col">
 			<MangaMeta mangaMeta={mangaMeta}></MangaMeta>
-			<ChapterList comicKId={mangaMeta.mangaID}></ChapterList>
+			<ChapterList
+				comicKId={mangaMeta.mangaID}
+				anilistId={mangaMeta?.anilistId || mangaMeta?.malId}
+			></ChapterList>
 		</div>
 	);
 }
