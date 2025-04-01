@@ -1,4 +1,4 @@
-# Dokusho - A Next.js Learning Project
+# Dokusho
 
 This project is for me to learn and explore Next.js. It's a manga reader with AniList tracker support.
 
