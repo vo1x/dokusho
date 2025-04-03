@@ -65,44 +65,41 @@ export default function Navigation() {
 						</button>
 					</div>
 
-					{isDropdownVisible && (
-						<div
-							ref={dropdownRef}
-							className={
-								"absolute right-0 mt-2 mr-4 flex w-48 flex-col gap-4 overflow-hidden rounded-md border border-dokusho-highlight-low bg-dokusho-overlay p-4 text-sm text-white/80 shadow-dokusho-shadow/20 shadow-lg"
-							}
-						>
-							{!session && (
-								<button
-									onClick={() => signIn("anilist")}
-									className="flex cursor-pointer items-center gap-2 rounded-md hover:bg-dokusho-highlight-high"
-								>
-									<LogIn size={18}></LogIn>
-									<span>Log in with AniList</span>
-								</button>
-							)}
+					<div
+						ref={dropdownRef}
+						className={`absolute right-0 mt-2 mr-4 flex w-48 flex-col gap-4 overflow-hidden rounded-md border border-dokusho-highlight-low bg-dokusho-overlay p-4 text-sm text-white/80 shadow-dokusho-shadow/20 shadow-lg transition-all duration-150 ease-in-out${isDropdownVisible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-[-10px] opacity-0"}
+						`}
+					>
+						{!session && (
+							<button
+								onClick={() => signIn("anilist")}
+								className="flex cursor-pointer items-center gap-2 rounded-md hover:bg-dokusho-highlight-high"
+							>
+								<LogIn size={18}></LogIn>
+								<span>Log in with AniList</span>
+							</button>
+						)}
 
-							<div className="py-1">
-								<Link
-									href="/profile"
-									className="flex flex items-center items-center gap-2"
-								>
-									<User size={18} />
-									Profile
-								</Link>
-							</div>
-
-							{session && (
-								<button
-									onClick={() => signOut()}
-									className="flex w-full items-center gap-2 rounded-md text-dokusho-danger"
-								>
-									<LogOut size={18} />
-									Sign out
-								</button>
-							)}
+						<div className="py-1">
+							<Link
+								href="/profile"
+								className="flex flex items-center items-center gap-2"
+							>
+								<User size={18} />
+								Profile
+							</Link>
 						</div>
-					)}
+
+						{session && (
+							<button
+								onClick={() => signOut()}
+								className="flex w-full items-center gap-2 rounded-md text-dokusho-danger"
+							>
+								<LogOut size={18} />
+								Sign out
+							</button>
+						)}
+					</div>
 				</div>
 			</div>
 		</nav>
