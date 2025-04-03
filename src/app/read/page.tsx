@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 import {
 	useAnilistData,
-	useUpdateAnilistProgress,
+	useUpdateMangaList,
 } from "@/hooks/useAnilistData";
 
 export default function Reader() {
@@ -21,7 +21,6 @@ export default function Reader() {
 	const [loadedImages, setLoadedImages] = useState(0);
 	const [isChapterComplete, setIsChapterComplete] = useState(false);
 
-	// Get the query parameters
 	const mangaId = searchParams.get("mangaId");
 	const chapterId = searchParams.get("chapterId");
 	const anilistId = searchParams.get("anilistId");
@@ -34,7 +33,7 @@ export default function Reader() {
 	const { data: anilistData, isLoading: isLoadingAnilist } =
 		useAnilistData(anilistId);
 
-	const updateProgress = useUpdateAnilistProgress();
+	const updateProgress = useUpdateMangaList();
 
 	useEffect(() => {
 		hasUpdatedRef.current = false;
