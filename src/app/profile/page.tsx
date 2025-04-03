@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-type MangaStatus = "CURRENT" | "COMPLETED" | "PLANNING" | "PAUSED" | "DROPPED";
+import type { MangaStatus } from "@/types/types";
 
 export default function Profile() {
 	const { data: session, status } = useSession();

@@ -1,21 +1,24 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-// ...existing code...
-
-images: {
-  remotePatterns: [
-    {
-      protocol: 'https',
-      hostname: 's4.anilist.co',
-      port: '',
-      pathname: '/file/anilistcdn/**',
-    },
-    // Add other domains as needed following the same pattern
-  ],
-},
-
-// ...existing code...
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "s4.anilist.co",
+				port: "",
+				pathname: "/file/anilistcdn/**",
+			},
+			{
+				protocol: "https",
+				hostname: "**.comick.fun",
+			},
+			{
+				protocol: "https",
+				hostname: "meo.comick.pictures",
+			},
+		],
+	},
 };
 
 export default nextConfig;

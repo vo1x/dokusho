@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+import type { IMangaResponse } from "@/types/types";
+
 export async function GET(request: NextRequest) {
 	const session = await getServerSession(authOptions);
 
@@ -78,7 +80,8 @@ export async function GET(request: NextRequest) {
 		}
 
 		const data = await response.json();
-		return NextResponse.json(data.data.Media, { status: 200 });
+		const mangaData = data.data.Media as IMangaResponse;
+		return NextResponse.json(mangaData, { status: 200 });
 	} catch (error) {
 		console.error("Error fetching media list entry:", error);
 		return NextResponse.json(
