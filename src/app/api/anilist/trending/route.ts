@@ -7,7 +7,14 @@ export async function GET(req: NextRequest) {
 	try {
 		const query = `
       query TrendingManga($page: Int, $perPage: Int) {
-        Page(perPage: $perPage) {
+        Page(page:$page, perPage: $perPage) {
+         pageInfo {
+            total
+            currentPage
+            lastPage
+            hasNextPage
+            perPage
+          }
           media(type: MANGA, sort: TRENDING_DESC, isAdult: false) {
             id
             title {
@@ -40,7 +47,7 @@ export async function GET(req: NextRequest) {
       }
     `;
 		const variables = {
-			page,
+			page: page,
 			perPage: 20,
 		};
 
@@ -62,9 +69,13 @@ export async function GET(req: NextRequest) {
 		}
 
 		const data = await response.json();
-
+		if (data.errors) {
+			console.error("GraphQL errors:", data.errors);
+			throw new Error(`GraphQL error: ${data.errors[0].message}`);
+		}
 		return NextResponse.json({
 			results: data?.data?.Page?.media || [],
+			pageInfo: data?.data?.Page?.pageInfo || {},
 		});
 	} catch (error) {
 		console.error("Error fetching trending manga:", error);
