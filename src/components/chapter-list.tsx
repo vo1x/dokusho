@@ -2,6 +2,7 @@
 
 import { useAnilistData } from "@/hooks/useAnilistData";
 import { useMangaChapters } from "@/hooks/useMangaChapters";
+import Link from "next/link";
 
 export const ChapterList = ({ comicKId, anilistId }) => {
 	const { data: chapters, isLoading } = useMangaChapters(comicKId);
@@ -36,13 +37,14 @@ export const ChapterList = ({ comicKId, anilistId }) => {
 							const isRead = chapter.chNum <= currentReadingProgress;
 
 							return (
-								<div
+								<Link
 									key={chapter.chId}
 									className={`flex w-full flex-col gap-1 border-b border-b-dokusho-highlight-low p-4 ${
 										isRead
 											? "bg-dokusho-overlay/50 opacity-60"
 											: "bg-dokusho-overlay"
 									}`}
+									href={`/read?mangaId=${comicKId}&chapterId=${chapter.chId}&anilistId=${anilistId}&chNum=${chapter.chNum}`}
 								>
 									<span
 										className={`line-clamp-1 ${
@@ -74,7 +76,7 @@ export const ChapterList = ({ comicKId, anilistId }) => {
 											{chapter.groupName}
 										</span>
 									</div>
-								</div>
+								</Link>
 							);
 						})
 					) : (

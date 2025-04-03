@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
+import { toast } from "sonner";
+import { useUpdateMangaList } from "@/hooks/useAnilistData";
+
 export const AddToListModal = ({
 	trackerInfo,
 	isOpen,
@@ -42,52 +45,33 @@ export const AddToListModal = ({
 	});
 
 	const [notes, setNotes] = useState(trackerInfo?.mediaListEntry?.notes || "");
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [success, setSuccess] = useState(false);
+
+	const updateMutation = useUpdateMangaList();
+
+	const isMutating = updateMutation.status === "pending";
 
 	const handleSubmit = async () => {
-		setLoading(true);
-		setError(null);
-
 		try {
-			const response = await fetch("/api/anilist/update-list", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					mediaId: trackerInfo.id,
-					status,
-					progress,
-					score,
-					startedAt: startDate.year ? startDate : null,
-					completedAt: endDate.year ? endDate : null,
-					notes,
-				}),
+			await updateMutation.mutateAsync({
+				anilistId: trackerInfo?.id,
+				progress,
+				status,
+				score,
+				startDate,
+				endDate,
+				notes,
 			});
-
-			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(errorData.error || "Failed to update list");
-			}
-
-			setSuccess(true);
-			setTimeout(() => {
-				onClose();
-			}, 1500);
-		} catch (err) {
-			setError(err.message || "An error occurred");
-		} finally {
-			setLoading(false);
+			toast.success("Manga list updated");
+		} catch (error) {
+			toast.error("Error updating progress: ", error);
+			console.error("Error updating progress: ", error);
 		}
 	};
 
 	if (!trackerInfo) return <p>Loading entry info...</p>;
-	if (error) return <p className="text-red-500">Error: {error}</p>;
 
 	return (
-		<div className="fixed inset-0 z-50 flex h-full items-center border bg-black/60 p-4 backdrop-blur-lg">
+		<div className="fixed inset-0 z-50 flex h-full items-center bg-black/60 p-4 backdrop-blur-lg">
 			<div className="mx-auto h-[75vh] w-full max-w-md overflow-y-auto rounded-md border border-dokusho-highlight-low bg-dokusho-base">
 				<div className="relative h-32">
 					<img
@@ -107,20 +91,6 @@ export const AddToListModal = ({
 					<h2 className="mb-4 font-semibold text-dokusho-subtle text-xl">
 						{trackerInfo?.title?.english || trackerInfo?.title?.romaji}
 					</h2>
-
-					{error && (
-						<div className="mb-4 rounded-md border border-red-800/50 bg-red-900/30 p-3">
-							<p className="text-red-400 text-sm">{error}</p>
-						</div>
-					)}
-
-					{success && (
-						<div className="mb-4 rounded-md border border-green-800/50 bg-green-900/30 p-3">
-							<p className="text-green-400 text-sm">
-								Successfully added to list!
-							</p>
-						</div>
-					)}
 
 					<form
 						onSubmit={(e) => e.preventDefault()}
@@ -243,10 +213,10 @@ export const AddToListModal = ({
 							<button
 								type="button"
 								onClick={handleSubmit}
-								disabled={loading}
+								disabled={isMutating}
 								className="rounded-md bg-dokusho-highlight-high px-4 py-2 text-white transition-colors hover:bg-dokusho-highlight-high/90 disabled:opacity-70"
 							>
-								{loading
+								{isMutating
 									? "Saving..."
 									: trackerInfo?.mediaListEntry
 										? "Update"

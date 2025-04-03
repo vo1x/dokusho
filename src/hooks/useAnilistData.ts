@@ -20,6 +20,58 @@ export function useAnilistData(anilistId: string) {
 	});
 }
 
+export function useUpdateMangaList() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async ({
+			anilistId,
+			status,
+			progress,
+			progressVolumes,
+			score,
+			startDate,
+			endDate,
+			notes,
+		}: {
+			anilistId: string;
+			progress: number;
+			status?: string;
+			progressVolumes?: string;
+			score?: number;
+			startDate?: any;
+			endDate?: any;
+			notes?: string;
+		}) => {
+			const response = await fetch("/api/anilist/update-list", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					mediaId: anilistId,
+					status,
+					progress,
+					progressVolumes,
+					score,
+					startDate,
+					endDate,
+					notes,
+				}),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to update list");
+			}
+			const data = await response.json();
+			return data;
+		},
+		onSuccess: (data, variables) => {
+			queryClient.invalidateQueries(["anilist", variables.anilistId]);
+		},
+	});
+}
+
 export function useUpdateAnilistProgress() {
 	const queryClient = useQueryClient();
 	return useMutation({
