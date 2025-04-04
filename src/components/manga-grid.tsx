@@ -84,6 +84,10 @@ function MangaCard({ manga }) {
 					>
 						{title}
 					</h3>
+
+                    <span className="text-xs bg-[#151f2e] text-[#728AA1] px-2 rounded-md p-1 font-semibold">
+                        {manga.countryOfOrigin}
+                    </span>
 					{/* {manga.averageScore && (
 						<div className="mt-2 inline-block rounded bg-dokusho-highlight-med px-1.5 py-0.5 text-white text-xs">
 							{manga.averageScore}%
