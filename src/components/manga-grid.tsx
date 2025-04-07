@@ -1,5 +1,4 @@
-"use client"
-
+"use client";
 
 import { useInfiniteTrendingManga } from "@/hooks/useTrendingManga";
 import { useEffect } from "react";
@@ -47,8 +46,7 @@ export default function InfiniteMangaGrid() {
 				{isFetchingNextPage ? (
 					<LoadingIndicator />
 				) : hasNextPage ? (
-					<div className="h-10 w-10">
-					</div>
+					<div className="h-10 w-10"></div>
 				) : (
 					<p className="text-center text-dokusho-text-muted text-sm">
 						No more manga to load
@@ -85,14 +83,9 @@ function MangaCard({ manga }) {
 						{title}
 					</h3>
 
-                    <span className="text-xs bg-[#151f2e] text-[#728AA1] px-2 rounded-md p-1 font-semibold">
-                        {manga.countryOfOrigin}
-                    </span>
-					{/* {manga.averageScore && (
-						<div className="mt-2 inline-block rounded bg-dokusho-highlight-med px-1.5 py-0.5 text-white text-xs">
-							{manga.averageScore}%
-						</div>
-					)} */}
+					<span className="rounded-md bg-[#151f2e] p-1 px-2 font-semibold text-[#728AA1] text-xs">
+						{manga.countryOfOrigin}
+					</span>
 				</div>
 			</div>
 		</Link>
@@ -113,7 +106,7 @@ function LoadingSkeleton() {
 					<div key={index} className="animate-pulse">
 						<div className="aspect-[2/3] w-full rounded-md bg-dokusho-highlight-low"></div>
 						<div className="mt-2 h-4 w-3/4 rounded bg-dokusho-highlight-low"></div>
-						<div className="mt-1 h-3 w-1/2 rounded bg-dokusho-highlight-low"></div>
+						{/* <div className="mt-1 h-3 w-1/2 rounded bg-dokusho-highlight-low"></div> */}
 					</div>
 				))}
 			</div>
