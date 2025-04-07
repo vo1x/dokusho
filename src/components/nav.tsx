@@ -65,9 +65,11 @@ export default function Navigation() {
 						</button>
 					</div>
 
-					<div
+
+					{isDropdownVisible && 
+						<div
 						ref={dropdownRef}
-						className={`absolute right-0 mt-2 mr-4 flex w-48 flex-col gap-4 overflow-hidden rounded-md border border-dokusho-highlight-low bg-dokusho-overlay p-4 text-sm text-white/80 shadow-dokusho-shadow/20 shadow-lg transition-all duration-150 ease-in-out${isDropdownVisible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-[-10px] opacity-0"}
+						className={`absolute right-0 mt-2 mr-4 flex w-48 flex-col gap-4 overflow-hidden rounded-md border border-dokusho-highlight-low bg-dokusho-overlay p-4 text-sm text-white/80 shadow-dokusho-shadow/20 shadow-lg transition-all duration-150 ease-in-out
 						`}
 					>
 						{!session && (
@@ -100,6 +102,9 @@ export default function Navigation() {
 							</button>
 						)}
 					</div>
+
+					}
+					
 				</div>
 			</div>
 		</nav>
