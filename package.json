@@ -16,6 +16,7 @@
     "lucide-react": "^0.486.0",
     "next": "15.2.4",
     "next-auth": "^4.24.11",
+    "nextjs-toploader": "^3.8.16",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-intersection-observer": "^9.16.0",

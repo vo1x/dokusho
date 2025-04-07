@@ -6,6 +6,8 @@ import ReactQueryProvider from "@/components/ReactQueryProvider";
 import Navigation from "@/components/nav";
 import { Toaster } from "sonner";
 
+import NextTopLoader from "nextjs-toploader";
+
 const geistSans = Geist({
 	variable: "--font-geist-sans",
 	subsets: ["latin"],
@@ -33,6 +35,7 @@ export default function RootLayout({
 			>
 				<ReactQueryProvider>
 					<AuthProvider>
+						<NextTopLoader />
 						<Navigation />
 						{children}
 						<Toaster
