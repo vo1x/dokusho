@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
             countryOfOrigin
             isAdult
             description
+            siteUrl
           }
         }
       }
