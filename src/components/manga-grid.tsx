@@ -1,6 +1,7 @@
 "use client";
 
 import { useInfiniteTrendingManga } from "@/hooks/useTrendingManga";
+import { useInfiniteMangaUpdates } from "@/hooks/useMangaUpdates";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
@@ -20,7 +21,7 @@ export default function InfiniteMangaGrid() {
 		isFetchingNextPage,
 		isLoading,
 		error,
-	} = useInfiniteTrendingManga();
+	} = useInfiniteMangaUpdates();
 
 	useEffect(() => {
 		if (inView && hasNextPage && !isFetchingNextPage) {
@@ -28,7 +29,7 @@ export default function InfiniteMangaGrid() {
 		}
 	}, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-	if (isLoading) return <LoadingSkeleton></LoadingSkeleton>;
+	if (isLoading) return <LoadingSkeleton />;
 
 	if (error) return <div>Error</div>;
 
@@ -36,8 +37,11 @@ export default function InfiniteMangaGrid() {
 		<div className="container mx-auto px-4">
 			<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
 				{data?.pages.map((page) =>
-					page.results.map((manga) => (
-						<MangaCard key={manga.id} manga={manga} />
+					page.data.map((manga) => (
+						<MangaCard
+							key={`${manga.manga.hid}-${manga.chNum}`}
+							manga={manga}
+						/>
 					)),
 				)}
 			</div>
@@ -58,17 +62,18 @@ export default function InfiniteMangaGrid() {
 }
 
 function MangaCard({ manga }) {
-	const title = manga.title.english || manga.title.romaji;
+	const { manga: mangaData, chNum, chVol } = manga;
+	const title = mangaData.title;
 
 	return (
 		<Link
-			href={`/manga/${manga.id}`}
+			href={`/manga/${mangaData.hid}`}
 			className="group hover:-translate-y-1 transition-transform"
 		>
 			<div className="overflow-hidden rounded-md bg-dokusho-bg-med shadow">
 				<div className="relative aspect-[2/3] w-full">
 					<Image
-						src={manga.coverImage.large}
+						src={mangaData.cover.url}
 						alt={title}
 						fill
 						sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
@@ -83,9 +88,18 @@ function MangaCard({ manga }) {
 						{title}
 					</h3>
 
-					<span className="rounded-md bg-[#151f2e] p-1 px-2 font-semibold text-[#728AA1] text-xs">
-						{manga.countryOfOrigin}
-					</span>
+					<div className="flex justify-between items-center mt-1">
+						<span className="rounded-md bg-[#151f2e] p-1 px-2 font-semibold text-[#728AA1] text-xs">
+							{mangaData.country}
+						</span>
+
+						{chNum && (
+							<span className="text-xs text-dokusho-text-muted">
+								Ch {chNum}
+								{chVol ? ` Vol ${chVol}` : ""}
+							</span>
+						)}
+					</div>
 				</div>
 			</div>
 		</Link>

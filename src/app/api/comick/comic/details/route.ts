@@ -9,11 +9,12 @@ export async function GET(request: NextRequest) {
 			{ status: 404 },
 		);
 
-	const url = `https://api.comick.fun/comic/${mangaId}?tachiyomi=true`;
+	const url = `https://api.comick.fun/comic/${encodeURIComponent(mangaId)}?tachiyomi=true`;
 
 	try {
 		const response = await fetch(url);
 		const data = await response.json();
+		console.log(data)
 		const mangaDetails = {
 			mangaID: data.comic.hid,
 			slug: data.comic.slug,
@@ -38,6 +39,7 @@ export async function GET(request: NextRequest) {
 		};
 		return NextResponse.json({ ...mangaDetails }, { status: 200 });
 	} catch (error) {
+		console.error(error);
 		return NextResponse.json(
 			{ error: "Internal Server Error" },
 			{ status: 500 },

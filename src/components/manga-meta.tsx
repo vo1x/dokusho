@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { BookOpen, Bookmark, ChevronDown } from "lucide-react";
 
@@ -9,69 +9,17 @@ import { useAnilistData } from "@/hooks/useAnilistData";
 
 import { AddToListModal } from "./modals/add-to-list";
 import { createPortal } from "react-dom";
-
-type MangaStatus = "CURRENT" | "COMPLETED" | "PLANNING" | "PAUSED" | "DROPPED";
-
-interface ITrackerInfo {
-	status: null | MangaStatus;
-}
+import { cn } from "@/lib/utils";
 
 export const MangaMeta = ({ mangaMeta }) => {
 	const router = useRouter();
-	// const [trackerInfo, setTrackerInfo] = useState({
-	// 	status: null,
-	// 	progress: 0,
-	// 	score: 0,
-	// 	startedAt: { year: null, month: null, day: null },
-	// 	completedAt: { year: null, month: null, day: null },
-	// 	notes: "",
-	// });
 
 	const { data: trackerInfo, isLoading } = useAnilistData(
 		mangaMeta?.anilistId || mangaMeta?.malId,
 	);
 
+	console.log(mangaMeta);
 	const [isEditorOpen, setIsEditorOpen] = useState(false);
-	// useEffect(() => {
-	// 	const fetchEntryInfo = async () => {
-	// 		try {
-	// 			const response = await fetch(
-	// 				`/api/anilist/get-entry?mediaId=${mangaMeta.anilistId || mangaMeta.malId}`,
-	// 			);
-	// 			if (!response.ok) {
-	// 				throw new Error("Failed to fetch entry info");
-	// 			}
-
-	// 			const data = await response.json();
-	// 			const entry = data.mediaListEntry;
-
-	// 			if (entry) {
-	// 				setTrackerInfo({
-	// 					status: entry.status || "PLANNING",
-	// 					progress: entry.progress || 0,
-	// 					score: entry.score || 0,
-	// 					startedAt: entry.startedAt || {
-	// 						year: null,
-	// 						month: null,
-	// 						day: null,
-	// 					},
-	// 					completedAt: entry.completedAt || {
-	// 						year: null,
-	// 						month: null,
-	// 						day: null,
-	// 					},
-	// 					notes: entry.notes || "",
-	// 				});
-	// 			}
-	// 		} catch (err: any) {
-	// 			console.error("Error fetching entry info:", err);
-	// 		}
-	// 	};
-
-	// 	if (mangaMeta.anilistId || mangaMeta.malId) {
-	// 		fetchEntryInfo();
-	// 	}
-	// }, [mangaMeta.anilistId, mangaMeta.malId]);
 
 	return (
 		<div className="relative p-4">
@@ -115,14 +63,20 @@ export const MangaMeta = ({ mangaMeta }) => {
 
 								<button
 									onClick={() => setIsEditorOpen((prev) => !prev)}
-									className="flex h-12 min-w-38 items-center justify-center gap-2 rounded-md bg-dokusho-button-secondary p-2 px-4 text-lg text-rosepine-moon-foam"
+									className={cn(
+										"flex h-12 min-w-38 items-center justify-center gap-2 rounded-md bg-dokusho-button-secondary p-2 px-4 text-lg text-rosepine-moon-foam",
+										{
+											"opacity-50": !trackerInfo?.mediaListEntry?.status,
+										},
+									)}
+									disabled={!trackerInfo?.mediaListEntry?.status}
 								>
-									<Bookmark size={18} fill="#9ccfd8"></Bookmark>
+									<Bookmark size={18} fill="#9ccfd8" />
 									<span className="capitalize">
 										{trackerInfo?.mediaListEntry?.status?.toLowerCase() ||
 											"Add to List"}
 									</span>
-									<ChevronDown></ChevronDown>
+									<ChevronDown />
 								</button>
 							</div>
 						</div>
