@@ -4,8 +4,12 @@ import { useAnilistData } from "@/hooks/useAnilistData";
 import { useMangaChapters } from "@/hooks/useMangaChapters";
 import Link from "next/link";
 
+import { toast } from "sonner";
+
 export const ChapterList = ({ comicKId, anilistId }) => {
 	const { data: chapters, isLoading } = useMangaChapters(comicKId);
+
+
 
 	const { data: anilistData, isLoading: isAnilistLoading } =
 		useAnilistData(anilistId);
