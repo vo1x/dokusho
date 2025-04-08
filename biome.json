@@ -19,17 +19,7 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true,
-			"nursery": {
-				"useSortedClasses": {
-					"level": "warn",
-					"fix": "safe",
-					"options": {
-						"attributes": ["className"],
-						"functions": ["cn"]
-					}
-				}
-			}
+			"recommended": true
 		}
 	},
 	"javascript": {
