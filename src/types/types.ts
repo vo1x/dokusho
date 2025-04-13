@@ -3,7 +3,8 @@ export type MangaStatus =
 	| "COMPLETED"
 	| "PLANNING"
 	| "PAUSED"
-	| "DROPPED";
+	| "DROPPED"
+	| "REPEATING";
 
 export interface IDate {
 	year: number | null;

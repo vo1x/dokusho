@@ -3,13 +3,50 @@
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { Pencil, Star, BookOpen, Eye } from "lucide-react";
 
-import type { MangaStatus } from "@/types/types";
+import { AddToListModal } from "@/components/modals/add-to-list";
+
+import { createPortal } from "react-dom";
+
+import type { MangaStatus, IMangaListEntry } from "@/types/types";
+import { useAnilistData } from "@/hooks/useAnilistData";
+
+interface MangaEntry {
+	id: number;
+	mediaId: number;
+	progress: number;
+	progressVolumes: number;
+	score: number;
+	status: MangaStatus;
+	media?: {
+		title?: {
+			english?: string;
+			romaji?: string;
+		};
+		coverImage?: {
+			medium?: string;
+		};
+		chapters?: number;
+		volumes?: number;
+	};
+}
+
+interface MangaList {
+	status: MangaStatus;
+	entries?: MangaEntry[];
+}
 
 export default function Profile() {
 	const { data: session, status } = useSession();
-	const [mangaItems, setMangaItems] = useState([]);
+	const [mangaItems, setMangaItems] = useState<MangaList[]>([]);
 	const [selectedTab, setSelectedTab] = useState<MangaStatus>("CURRENT");
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+
+	const {data: selectedEntry, isLoading:isAnilistLoading } = useAnilistData(selectedEntryId)
 
 	const handleTabSelect = (filter: MangaStatus) => {
 		if (filter) setSelectedTab(filter);
@@ -18,6 +55,8 @@ export default function Profile() {
 	useEffect(() => {
 		async function fetchManga() {
 			try {
+				setIsLoading(true);
+				setError(null);
 				if (status === "authenticated" && session) {
 					const response = await fetch("/api/anilist/list");
 					const data = await response.json();
@@ -28,61 +67,160 @@ export default function Profile() {
 				}
 			} catch (err) {
 				console.error("Failed to fetch manga list:", err);
+				setError("Failed to load your manga list. Please try again later.");
+			} finally {
+				setIsLoading(false);
 			}
 		}
 
 		fetchManga();
 	}, [status, session]);
-	if (status === "loading") return <div>Loading user profile...</div>;
 
-	if (status === "unauthenticated")
-		return <div>Please login in []button goes here </div>;
+	if (status === "loading" || isLoading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center">
+				<div className="text-center">
+					<div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-dokusho-primary border-t-transparent"></div>
+					<p className="text-dokusho-text">Loading your profile...</p>
+				</div>
+			</div>
+		);
+	}
 
-	if (!session) return <div>please login</div>;
+	if (status === "unauthenticated") {
+		return (
+			<div className="flex min-h-screen flex-col items-center justify-center gap-4 p-4 text-center">
+				<h2 className="text-2xl font-bold text-dokusho-text">Please Sign In</h2>
+				<p className="text-dokusho-muted">
+					Sign in to view and manage your manga collection
+				</p>
+				<a
+					href="/api/auth/signin"
+					className="rounded-lg bg-dokusho-primary px-6 py-3 text-white hover:bg-dokusho-primary-light"
+				>
+					Sign In
+				</a>
+			</div>
+		);
+	}
+
+	if (!session) return null;
 
 	return (
-		<div className="flex flex-col gap-8 p-8">
-			<div className="flex items-end gap-2">
-				<Image
-					src={session.user.image}
-					width={128}
-					height={128}
-					alt="user profile"
-				/>
-				<span className="font-semibold text-2xl">{session.user.name}</span>
+		<div className="min-h-screen bg-dokusho-base p-4 md:p-8">
+			<div className="mb-8 flex flex-col items-center gap-4 rounded-lg bg-dokusho-surface p-6 shadow-lg md:flex-row md:items-end">
+				<div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-dokusho-primary">
+					<Image
+						src={session.user.image || "/default-avatar.png"}
+						alt="Profile picture"
+						fill
+						className="object-cover"
+					/>
+				</div>
+				<div className="text-center md:text-left">
+					<h1 className="text-2xl font-bold text-dokusho-text">
+						{session.user.name}
+					</h1>
+					<p className="text-dokusho-muted">{session.user.email}</p>
+				</div>
 			</div>
 
-			<div>
-				<button onClick={() => handleTabSelect("CURRENT")}>Reading</button>
-				<button onClick={() => handleTabSelect("PLANNING")}>
+			<div className="mb-6 flex flex-wrap justify-center gap-2">
+				<button
+					onClick={() => handleTabSelect("CURRENT")}
+					className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+						selectedTab === "CURRENT"
+							? "bg-dokusho-primary text-white"
+							: "bg-dokusho-overlay text-dokusho-text hover:bg-dokusho-highlight-med"
+					}`}
+				>
+					Reading
+				</button>
+				<button
+					onClick={() => handleTabSelect("COMPLETED")}
+					className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+						selectedTab === "COMPLETED"
+							? "bg-dokusho-primary text-white"
+							: "bg-dokusho-overlay text-dokusho-text hover:bg-dokusho-highlight-med"
+					}`}
+				>
+					Completed
+				</button>
+				<button
+					onClick={() => handleTabSelect("PAUSED")}
+					className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+						selectedTab === "PAUSED"
+							? "bg-dokusho-primary text-white"
+							: "bg-dokusho-overlay text-dokusho-text hover:bg-dokusho-highlight-med"
+					}`}
+				>
+					On Hold
+				</button>
+				<button
+					onClick={() => handleTabSelect("DROPPED")}
+					className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+						selectedTab === "DROPPED"
+							? "bg-dokusho-primary text-white"
+							: "bg-dokusho-overlay text-dokusho-text hover:bg-dokusho-highlight-med"
+					}`}
+				>
+					Dropped
+				</button>
+				<button
+					onClick={() => handleTabSelect("PLANNING")}
+					className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+						selectedTab === "PLANNING"
+							? "bg-dokusho-primary text-white"
+							: "bg-dokusho-overlay text-dokusho-text hover:bg-dokusho-highlight-med"
+					}`}
+				>
 					Plan to Read
 				</button>
+				<button
+					onClick={() => handleTabSelect("REPEATING")}
+					className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+						selectedTab === "REPEATING"
+							? "bg-dokusho-primary text-white"
+							: "bg-dokusho-overlay text-dokusho-text hover:bg-dokusho-highlight-med"
+					}`}
+				>
+					Rereading
+				</button>
 			</div>
-			<div className="w-full overflow-x-auto">
-				<table className="min-w-full border-collapse overflow-hidden rounded-md bg-rosepine-surface">
-					<thead className="bg-rosepine-overlay">
-						<tr>
-							<th className="px-4 py-2 text-left text-rosepine-text">Cover</th>
-							<th className="px-4 py-2 text-left text-rosepine-text">Title</th>
-							<th className="px-4 py-2 text-left text-rosepine-text">
-								Progress
-							</th>
-							<th className="px-4 py-2 text-left text-rosepine-text">Score</th>
-							<th className="px-4 py-2 text-left text-rosepine-text">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{mangaItems
-							.filter((manga) => manga.status === selectedTab)
-							.flatMap((manga) => manga.entries || [])
-							.map((entry) => (
-								<tr
+
+			{error ? (
+				<div className="rounded-lg bg-dokusho-danger/10 p-4 text-center text-dokusho-danger">
+					{error}
+				</div>
+			) : (
+				<div className="space-y-2">
+					{mangaItems
+						.filter((manga: MangaList) => manga.status === selectedTab)
+						.flatMap((manga: MangaList) => manga.entries || [])
+						.map((entry: MangaEntry) => {
+							console.log('Entry:', {
+								progress: entry.progress,
+								totalChapters: entry.media?.chapters,
+								title: entry.media?.title?.english || entry.media?.title?.romaji
+							});
+
+							const totalChapters = entry.media?.chapters;
+							const currentProgress = entry.progress ?? 0;
+							const progressPercentage = totalChapters 
+								? Math.min((currentProgress / totalChapters) * 100, 100)
+								: 100;
+
+							return (
+								<div
 									key={entry.id || entry.mediaId}
-									className="border-rosepine-overlay border-t hover:bg-rosepine-highlight-low"
+									className="group relative flex items-center gap-4 rounded-lg bg-dokusho-surface p-2 transition-colors hover:bg-dokusho-highlight-med"
 								>
-									<td className="px-4 py-2">
+									<a
+										href={`/manga/${entry.mediaId}`}
+										className="absolute inset-0 z-0"
+										aria-label={`View ${entry.media?.title?.english || entry.media?.title?.romaji || `Manga #${entry.id}`}`}
+									/>
+									<div className="relative z-10 h-24 w-16 flex-shrink-0 overflow-hidden rounded-md">
 										{entry.media?.coverImage?.medium ? (
 											<Image
 												src={entry.media.coverImage.medium}
@@ -91,81 +229,72 @@ export default function Profile() {
 													entry.media?.title?.romaji ||
 													"Manga cover"
 												}
-												width={50}
-												height={75}
-												className="rounded-sm object-cover"
+												fill
+												className="object-cover"
 											/>
 										) : (
-											<div className="h-[75px] w-[50px] rounded-sm bg-rosepine-highlight-med" />
+											<div className="h-full w-full bg-dokusho-highlight-med" />
 										)}
-									</td>
-									<td className="px-4 py-2">
-										<div className="font-medium">
-											{entry.media?.title?.english ||
-												entry.media?.title?.romaji ||
-												`Manga #${entry.id}`}
+									</div>
+									<div className="z-10 flex-1 overflow-hidden">
+										<div className="flex items-start justify-between">
+											<h3 className="mb-1 truncate font-medium text-dokusho-text group-hover:text-dokusho-primary">
+												{entry.media?.title?.english ||
+													entry.media?.title?.romaji ||
+													`Manga #${entry.id}`}
+											</h3>
 										</div>
-										<div className="text-rosepine-subtle text-sm">
-											{entry.media?.title?.romaji}
-										</div>
-									</td>
-									<td className="px-4 py-2">
-										<div className="text-rosepine-foam">
-											{entry.progress}{" "}
-											{entry.media?.chapters ? `/ ${entry.media.chapters}` : ""}{" "}
-											chapters
-										</div>
-										{entry.progressVolumes > 0 && (
-											<div className="text-rosepine-subtle text-sm">
-												{entry.progressVolumes}{" "}
-												{entry.media?.volumes ? `/ ${entry.media.volumes}` : ""}{" "}
-												volumes
+										<div className="flex items-center gap-4">
+											<div className="flex items-center gap-1.5 text-dokusho-subtle">
+												<BookOpen className="h-4 w-4" />
+												<span>{currentProgress}</span>
 											</div>
-										)}
-									</td>
-									<td className="px-4 py-2">
-										<div className="flex items-center gap-1">
-											<span className="text-rosepine-gold">{entry.score}</span>
+
 											{entry.score > 0 && (
-												<span className="text-rosepine-gold text-sm">/10</span>
+												<div className="flex items-center gap-1.5">
+													<Star className="h-4 w-4 fill-dokusho-gold text-dokusho-gold" />
+													<span className="text-dokusho-gold">
+														{entry.score}
+													</span>
+												</div>
 											)}
 										</div>
-									</td>
-									<td className="px-4 py-2">
-										<div className="flex gap-2">
-											<a
-												href={`/manga/${entry.mediaId}`}
-												className="rounded-md bg-rosepine-pine px-3 py-1 text-rosepine-text text-sm hover:bg-rosepine-pine/80"
-											>
-												View
-											</a>
-											<button
-												className="rounded-md bg-rosepine-overlay px-3 py-1 text-rosepine-text text-sm hover:bg-rosepine-highlight-med"
-												onClick={() => {
-													/* Handle edit action */
-												}}
-											>
-												Edit
-											</button>
-										</div>
-									</td>
-								</tr>
-							))}
-						{mangaItems
-							.filter((manga) => manga.status === selectedTab)
-							.flatMap((manga) => manga.entries || []).length === 0 && (
-							<tr>
-								<td
-									colSpan={5}
-									className="px-4 py-8 text-center text-rosepine-muted"
-								>
-									No manga found in this category
-								</td>
-							</tr>
-						)}
-					</tbody>
-				</table>
-			</div>
+									</div>
+									<button
+										className="z-10 ml-auto rounded-full p-2 text-dokusho-subtle hover:bg-dokusho-overlay hover:text-dokusho-text"
+										onClick={(e) => {
+											e.preventDefault();
+											e.stopPropagation();
+											setSelectedEntryId(entry.mediaId);
+										}}
+										aria-label="Edit manga entry"
+									>
+										<Pencil className="h-5 w-5" />
+									</button>
+								</div>
+							);
+						})}
+					{mangaItems
+						.filter((manga: MangaList) => manga.status === selectedTab)
+						.flatMap((manga: MangaList) => manga.entries || []).length === 0 && (
+						<div className="rounded-lg bg-dokusho-surface p-8 text-center">
+							<p className="text-dokusho-subtle">
+								No manga found in this category
+							</p>
+						</div>
+					)}
+				</div>
+			)}
+			{selectedEntryId && !isAnilistLoading && 
+				typeof window === "object" &&
+				createPortal(
+					<AddToListModal
+						isOpen={true}
+						trackerInfo={selectedEntry}
+						onClose={() => setSelectedEntryId(null)}
+					/>,
+					document.body,
+				)}
 		</div>
 	);
 }
