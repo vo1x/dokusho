@@ -38,7 +38,7 @@ export default function Navigation() {
 	};
 
 	return (
-		<nav className="sticky top-0 z-50 border-dokusho-highlight-low border-b bg-dokusho-base/90 p-3 shadow-lg backdrop-blur-lg">
+		<nav className="sticky top-0 z-50 border-dokusho-highlight-low border-b bg-dokusho-base/90 p-3 shadow-lg backdrop-blur-lg transition-transform duration-300" style={{ transform: 'translateY(var(--nav-translate, 0))' }}>
 			<div className="mx-auto flex max-w-7xl items-center justify-between">
 				<Link href="/" className="font-bold text-2xl">
 					Dokusho
