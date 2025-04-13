@@ -35,7 +35,7 @@ export default function RootLayout({
 			>
 				<ReactQueryProvider>
 					<AuthProvider>
-						<NextTopLoader />
+						<NextTopLoader showSpinner={false} />
 						<Navigation />
 						{children}
 						<Toaster

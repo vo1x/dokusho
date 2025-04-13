@@ -9,6 +9,4 @@ export default async function Home() {
 				<h1 className="text-xl font-semibold text-dokusho-subtle">UPDATES</h1>
 			</section>
 			<InfiniteMangaGrid />
-		</div>
-	);
-}
+		</div>)}
