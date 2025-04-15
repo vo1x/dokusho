@@ -2,16 +2,15 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type KeyboardEvent } from "react";
 
 import { useSearchParams } from "next/navigation";
 
 import { toast } from "sonner";
 
-import {
-	useAnilistData,
-	useUpdateMangaList,
-} from "@/hooks/useAnilistData";
+import { useAnilistData, useUpdateMangaList } from "@/hooks/useAnilistData";
+
+import { ArrowUp } from "lucide-react";
 
 interface Page {
 	url: string;
@@ -32,34 +31,36 @@ export default function Reader() {
 	const chapterId = searchParams.get("chapterId");
 	const anilistId = searchParams.get("anilistId");
 	const chNum = searchParams.get("chNum");
+	const status = searchParams.get("status");
 
 	const hasUpdatedRef = useRef(false);
 	const hasReachedEndRef = useRef(false);
 
 	const currentChapterNumber = Number.parseInt(chNum || "0");
 
-	const { data: anilistData, isLoading: isLoadingAnilist } =
-		useAnilistData(anilistId || "");
+	const { data: anilistData, isLoading: isLoadingAnilist } = useAnilistData(
+		anilistId || "",
+	);
 
 	const updateProgress = useUpdateMangaList();
 
 	const handleTap = () => {
 		const now = Date.now();
-		const DOUBLE_TAP_DELAY = 300; 
+		const DOUBLE_TAP_DELAY = 300;
 
 		if (lastTapRef.current && now - lastTapRef.current < DOUBLE_TAP_DELAY) {
-			setShowNav(prev => !prev);
-			lastTapRef.current = 0; 
+			setShowNav((prev) => !prev);
+			lastTapRef.current = 0;
 		} else {
 			lastTapRef.current = now;
 		}
 	};
 
 	useEffect(() => {
-		document.body.style.setProperty('--nav-translate', showNav ? '0' : '-100%');
-		
+		document.body.style.setProperty("--nav-translate", showNav ? "0" : "-100%");
+
 		return () => {
-			document.body.style.removeProperty('--nav-translate');
+			document.body.style.removeProperty("--nav-translate");
 		};
 	}, [showNav]);
 
@@ -85,13 +86,19 @@ export default function Reader() {
 			const scrollTop = window.scrollY;
 			const windowHeight = window.innerHeight;
 			const documentHeight = document.documentElement.scrollHeight;
-			const currentScrollPercentage = (scrollTop + windowHeight) / documentHeight;
-			
+			const currentScrollPercentage =
+				(scrollTop + windowHeight) / documentHeight;
+
 			const newCurrentPage = Math.floor(currentScrollPercentage * pages.length);
 			setCurrentPage(Math.min(newCurrentPage, pages.length - 1));
 
-			if (!hasReachedEndRef.current && scrollTop + windowHeight >= documentHeight - 10) {
+			if (
+				!hasReachedEndRef.current &&
+				scrollTop + windowHeight >= documentHeight - 10
+			) {
 				hasReachedEndRef.current = true;
+
+				if (status !== "CURRENT") return;
 				handleProgressUpdate();
 			}
 		};
@@ -101,7 +108,7 @@ export default function Reader() {
 		return () => {
 			window.removeEventListener("scroll", handleScroll);
 		};
-	}, [loadedImages, pages.length]);
+	}, [loadedImages, pages.length, status]);
 
 	const handleProgressUpdate = async () => {
 		if (!anilistData || !anilistId || hasUpdatedRef.current) return;
@@ -130,7 +137,15 @@ export default function Reader() {
 	};
 
 	return (
-		<div className="relative min-h-screen bg-black reader-page" onClick={handleTap}>
+		<div
+			className="relative min-h-screen bg-black reader-page"
+			onClick={handleTap}
+			onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+				if (event.key.toLowerCase() === "m") {
+					setShowNav((prev) => !prev);
+				}
+			}}
+		>
 			<div className="flex max-w-full flex-col">
 				{pages.length > 0 ? (
 					pages.map((page, index) => (
@@ -138,7 +153,7 @@ export default function Reader() {
 							key={index}
 							onLoad={() =>
 								setLoadedImages((prev) =>
-									prev > pages.length ? pages.length : prev + 1
+									prev > pages.length ? pages.length : prev + 1,
 								)
 							}
 							src={page.url}
@@ -157,11 +172,11 @@ export default function Reader() {
 				<div className="relative px-2 pb-1">
 					<div className="w-full bg-black/50 backdrop-blur-sm p-1 rounded-t-sm">
 						<div className="w-full bg-cyan-950/50 rounded-full h-0.5">
-							<div 
-								className="bg-cyan-400 h-0.5 rounded-full transition-all duration-300 shadow-glow" 
-								style={{ 
+							<div
+								className="bg-cyan-400 h-0.5 rounded-full transition-all duration-300 shadow-glow"
+								style={{
 									width: `${((currentPage + 1) / pages.length) * 100}%`,
-									boxShadow: '0 0 4px rgba(34, 211, 238, 0.4)'
+									boxShadow: "0 0 4px rgba(34, 211, 238, 0.4)",
 								}}
 							></div>
 						</div>

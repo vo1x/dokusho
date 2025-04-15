@@ -38,7 +38,10 @@ export default function Navigation() {
 	};
 
 	return (
-		<nav className="sticky top-0 z-50 border-dokusho-highlight-low border-b bg-dokusho-base/90 p-3 shadow-lg backdrop-blur-lg transition-transform duration-300" style={{ transform: 'translateY(var(--nav-translate, 0))' }}>
+		<nav
+			className="sticky top-0 z-50 border-dokusho-highlight-low border-b bg-dokusho-base/90 p-3 shadow-lg backdrop-blur-lg transition-transform duration-300"
+			style={{ transform: "translateY(var(--nav-translate, 0))" }}
+		>
 			<div className="mx-auto flex max-w-7xl items-center justify-between">
 				<Link href="/" className="font-bold text-2xl">
 					Dokusho
@@ -65,46 +68,43 @@ export default function Navigation() {
 						</button>
 					</div>
 
-
-					{isDropdownVisible && 
+					{isDropdownVisible && (
 						<div
-						ref={dropdownRef}
-						className={`absolute right-0 mt-2 mr-4 flex w-48 flex-col gap-4 overflow-hidden rounded-md border border-dokusho-highlight-low bg-dokusho-overlay p-4 text-sm text-white/80 shadow-dokusho-shadow/20 shadow-lg transition-all duration-150 ease-in-out
+							ref={dropdownRef}
+							className={`absolute right-0 mt-2 mr-4 flex w-48 flex-col gap-4 overflow-hidden rounded-md border border-dokusho-highlight-low bg-dokusho-overlay p-4 text-sm text-white/80 shadow-dokusho-shadow/20 shadow-lg transition-all duration-150 ease-in-out
 						`}
-					>
-						{!session && (
-							<button
-								onClick={() => signIn("anilist")}
-								className="flex cursor-pointer items-center gap-2 rounded-md hover:bg-dokusho-highlight-high"
-							>
-								<LogIn size={18}></LogIn>
-								<span>Log in with AniList</span>
-							</button>
-						)}
+						>
+							{!session && (
+								<button
+									onClick={() => signIn("anilist")}
+									className="flex cursor-pointer items-center gap-2 rounded-md hover:bg-dokusho-highlight-high"
+								>
+									<LogIn size={18}></LogIn>
+									<span>Log in with AniList</span>
+								</button>
+							)}
 
-						<div className="py-1">
-							<Link
-								href="/profile"
-								className="flex flex items-center items-center gap-2"
-							>
-								<User size={18} />
-								Profile
-							</Link>
+							<div className="py-1">
+								<Link
+									href="/profile"
+									className="flex flex items-center items-center gap-2"
+								>
+									<User size={18} />
+									Profile
+								</Link>
+							</div>
+
+							{session && (
+								<button
+									onClick={() => signOut()}
+									className="flex w-full items-center gap-2 rounded-md text-dokusho-danger"
+								>
+									<LogOut size={18} />
+									Sign out
+								</button>
+							)}
 						</div>
-
-						{session && (
-							<button
-								onClick={() => signOut()}
-								className="flex w-full items-center gap-2 rounded-md text-dokusho-danger"
-							>
-								<LogOut size={18} />
-								Sign out
-							</button>
-						)}
-					</div>
-
-					}
-					
+					)}
 				</div>
 			</div>
 		</nav>
