@@ -2,15 +2,21 @@
 
 "use client";
 
-import { useState, useEffect, useRef, type KeyboardEvent } from "react";
+import {
+	useState,
+	useEffect,
+	useRef,
+	useMemo,
+	type KeyboardEvent,
+} from "react";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 import { toast } from "sonner";
 
 import { useAnilistData, useUpdateMangaList } from "@/hooks/useAnilistData";
 
-import { ArrowUp } from "lucide-react";
+import { useMangaStore } from "@/store/mangaStore";
 
 interface Page {
 	url: string;
@@ -43,6 +49,36 @@ export default function Reader() {
 	);
 
 	const updateProgress = useUpdateMangaList();
+
+	const chapters = useMangaStore((s) => s.chapters);
+	const getNextChapter = useMangaStore((s) => s.getNextChapter);
+	const getPrevChapter = useMangaStore((s) => s.getPrevChapter);
+
+	const [navReady, setNavReady] = useState(false);
+
+	const router = useRouter();
+
+	useEffect(() => {
+		if (chapters.length > 0 && chapterId) {
+			setNavReady(true);
+		} else {
+			setNavReady(false);
+		}
+	}, [chapters, chapterId]);
+
+	const nextChapter = useMemo(() => {
+		if (navReady) {
+			return getNextChapter(chapterId);
+		}
+		return undefined;
+	}, [navReady, getNextChapter, chapterId]);
+
+	const prevChapter = useMemo(() => {
+		if (navReady) {
+			return getPrevChapter(chapterId);
+		}
+		return undefined;
+	}, [navReady, getPrevChapter, chapterId]);
 
 	const handleTap = () => {
 		const now = Date.now();
@@ -92,14 +128,13 @@ export default function Reader() {
 			const newCurrentPage = Math.floor(currentScrollPercentage * pages.length);
 			setCurrentPage(Math.min(newCurrentPage, pages.length - 1));
 
-			if (
-				!hasReachedEndRef.current &&
-				scrollTop + windowHeight >= documentHeight - 10
-			) {
-				hasReachedEndRef.current = true;
+			if (newCurrentPage === pages.length - 1) {
+				setShowNav(true);
 
-				if (status !== "CURRENT") return;
-				handleProgressUpdate();
+				if (!hasReachedEndRef.current && status === "CURRENT") {
+					hasReachedEndRef.current = true;
+					handleProgressUpdate();
+				}
 			}
 		};
 
@@ -136,17 +171,27 @@ export default function Reader() {
 		}
 	};
 
+	useEffect(() => {
+		const handleToggleUI = (event: KeyboardEvent) => {
+			if (event.key.toLowerCase() === "m") {
+				setShowNav((prev) => !prev);
+			}
+		};
+
+		document.addEventListener("keydown", handleToggleUI);
+		return () => document.removeEventListener("keydown", handleToggleUI);
+	}, []);
+
 	return (
 		<div
-			className="relative min-h-screen bg-black reader-page"
+			className="relative min-h-screen bg-dokusho-base reader-page"
 			onClick={handleTap}
-			onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-				if (event.key.toLowerCase() === "m") {
-					setShowNav((prev) => !prev);
-				}
-			}}
+			style={{ touchAction: "manipulation" }}
 		>
-			<div className="flex max-w-full flex-col">
+			<div
+				className="flex max-w-full flex-col"
+				style={{ touchAction: "manipulation" }}
+			>
 				{pages.length > 0 ? (
 					pages.map((page, index) => (
 						<img
@@ -160,6 +205,7 @@ export default function Reader() {
 							alt={`Page ${index + 1}`}
 							className="w-full h-auto max-w-full object-contain"
 							loading="lazy"
+							style={{ touchAction: "manipulation" }}
 						/>
 					))
 				) : (
@@ -168,18 +214,103 @@ export default function Reader() {
 					</div>
 				)}
 			</div>
-			<div className="fixed bottom-0 left-0 right-0">
-				<div className="relative px-2 pb-1">
-					<div className="w-full bg-black/50 backdrop-blur-sm p-1 rounded-t-sm">
-						<div className="w-full bg-cyan-950/50 rounded-full h-0.5">
-							<div
-								className="bg-cyan-400 h-0.5 rounded-full transition-all duration-300 shadow-glow"
-								style={{
-									width: `${((currentPage + 1) / pages.length) * 100}%`,
-									boxShadow: "0 0 4px rgba(34, 211, 238, 0.4)",
-								}}
-							></div>
-						</div>
+
+			<div
+				className={`
+        fixed bottom-0 left-0 right-0 pb-4 z-20
+        transition-all duration-300
+        flex flex-col
+    `}
+				style={{
+					height: "6rem",
+					opacity: showNav ? 1 : 0,
+					transform: showNav ? "translateY(0)" : "translateY(100%)",
+					background: showNav
+						? "rgba(15, 23, 42, 0.95)"
+						: "rgba(15, 23, 42, 0)",
+					backdropFilter: showNav ? "blur(12px)" : "blur(0)",
+					borderTopLeftRadius: showNav ? "1rem" : "0",
+					borderTopRightRadius: showNav ? "1rem" : "0",
+					overflow: "hidden",
+					transition:
+						"transform 0.3s ease-out, opacity 0.2s ease-out, background 0.2s ease-out, backdrop-filter 0.2s ease-out, border-radius 0.2s ease-out",
+				}}
+			>
+				<div className="relative flex flex-col justify-end h-full px-6">
+					<div
+						className={`
+                flex flex-col items-center transition-all duration-300
+                ${showNav ? "opacity-100 translate-y-0 delay-150" : "opacity-0 -translate-y-2 pointer-events-none"}
+            `}
+						style={{
+							transition: "opacity 0.3s, transform 0.4s",
+						}}
+					>
+						{showNav && (
+							<span className="text-sm font-medium text-[#E2E8F0]">
+								Chapter {currentChapterNumber} &bull; Page {currentPage + 1} /{" "}
+								{pages.length}
+							</span>
+						)}
+					</div>
+					<div
+						className={`
+                flex items-center w-full gap-4 transition-all duration-300
+                ${showNav ? "opacity-100 translate-y-0 delay-300" : "opacity-0 translate-y-4 pointer-events-none"}
+            `}
+						style={{
+							height: showNav ? "2.5rem" : 0,
+							overflow: "hidden",
+							transition:
+								"opacity 0.3s 0.1s, transform 0.4s 0.1s, height 0.5s cubic-bezier(0.4,0,0.2,1)",
+						}}
+					>
+						{showNav && (
+							<>
+								<button
+									type="button"
+									className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#475569] to-[#64748B] hover:from-[#334155] hover:to-[#475569] disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-[#475569]/20 disabled:shadow-none"
+									onClick={() => {
+										if (prevChapter) {
+											router.push(
+												`/read?mangaId=${mangaId}&chapterId=${prevChapter.chId}&anilistId=${anilistId}&chNum=${prevChapter.chNum}&status=${status}`,
+											);
+										}
+									}}
+									disabled={!prevChapter}
+									aria-label="Previous Chapter"
+								>
+									<span className="text-white font-medium">Prev</span>
+								</button>
+								<div className="flex-1 flex items-center">
+									<div className="w-full bg-[#1E293B]/50 rounded-full h-2 transition-all duration-500">
+										<div
+											className="bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] rounded-full transition-all duration-500 shadow-glow"
+											style={{
+												height: "100%",
+												width: `${((currentPage + 1) / pages.length) * 100}%`,
+												boxShadow: "0 0 8px rgba(59, 130, 246, 0.4)",
+											}}
+										/>
+									</div>
+								</div>
+								<button
+									type="button"
+									className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] hover:from-[#2563EB] hover:to-[#3B82F6] disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-[#3B82F6]/20 disabled:shadow-none"
+									onClick={() => {
+										if (nextChapter) {
+											router.push(
+												`/read?mangaId=${mangaId}&chapterId=${nextChapter.chId}&anilistId=${anilistId}&chNum=${nextChapter.chNum}&status=${status}`,
+											);
+										}
+									}}
+									disabled={!nextChapter}
+									aria-label="Next Chapter"
+								>
+									<span className="text-white font-medium">Next</span>
+								</button>
+							</>
+						)}
 					</div>
 				</div>
 			</div>

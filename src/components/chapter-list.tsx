@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState, useMemo, useRef, useEffect } from "react";
 import Fuse from "fuse.js";
 import { toast } from "sonner";
+import { useMangaStore } from "@/store/mangaStore";
 
 export const ChapterList = ({ comicKId, anilistId }) => {
 	const { data: chapters, isLoading } = useMangaChapters(comicKId);
@@ -26,14 +27,6 @@ export const ChapterList = ({ comicKId, anilistId }) => {
 		return Array.from(uniqueScanlators).sort();
 	}, [chapters]);
 
-	const fuse = useMemo(() => {
-		if (!chapters) return null;
-		return new Fuse(chapters, {
-			keys: ["chNum", "title", "groupName"],
-			threshold: 0.3,
-		});
-	}, [chapters]);
-
 	const filteredChapters = useMemo(() => {
 		if (!chapters) return [];
 
@@ -45,13 +38,17 @@ export const ChapterList = ({ comicKId, anilistId }) => {
 			);
 		}
 
-		if (searchQuery && fuse) {
-			const searchResults = fuse.search(searchQuery);
+		if (searchQuery && result.length > 0) {
+			const fuseLocal = new Fuse(result, {
+				keys: ["chNum", "title", "groupName"],
+				threshold: 0.3,
+			});
+			const searchResults = fuseLocal.search(searchQuery);
 			result = searchResults.map((result) => result.item);
 		}
 
 		return result;
-	}, [chapters, searchQuery, selectedScanlators, fuse]);
+	}, [chapters, searchQuery, selectedScanlators]);
 
 	const handleScanlatorChange = (scanlator: string) => {
 		setSelectedScanlators((prev) => {
@@ -80,6 +77,12 @@ export const ChapterList = ({ comicKId, anilistId }) => {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
 	}, []);
+
+	useEffect(() => {
+		if (chapters) {
+			useMangaStore.getState().setChapters(chapters);
+		}
+	}, [chapters]);
 
 	return (
 		<div className="flex flex-col p-4">

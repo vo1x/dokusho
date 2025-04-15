@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { useMangaStore } from "@/store/mangaStore";
 
 export const MangaMeta = ({ mangaMeta }) => {
 	const router = useRouter();
@@ -17,10 +18,16 @@ export const MangaMeta = ({ mangaMeta }) => {
 	);
 	const [isEditorOpen, setIsEditorOpen] = useState(false);
 
+	useEffect(() => {
+		if (mangaMeta) {
+			useMangaStore.getState().setMetadata(mangaMeta);
+		}
+	}, [mangaMeta]);
+
 	const { data: searchResults } = useQuery({
 		queryKey: ["anilistSearch", mangaMeta.title],
 		queryFn: async () => {
-			if (anilistId) return null; 
+			if (anilistId) return null;
 
 			const response = await fetch(
 				`/api/anilist/search?query=${encodeURIComponent(mangaMeta.title)}`,
@@ -28,7 +35,7 @@ export const MangaMeta = ({ mangaMeta }) => {
 			if (!response.ok) throw new Error("Failed to search AniList");
 			return response.json();
 		},
-		enabled: !anilistId, 
+		enabled: !anilistId,
 		staleTime: 24 * 60 * 60 * 1000,
 		retry: 1,
 	});
